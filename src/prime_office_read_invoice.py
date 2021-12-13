@@ -1,6 +1,7 @@
 from src.invoice_parser import *
 from pathlib import Path
 
+
 def expand_folder(path, file_list):
     if path.is_file():
         file_list.append(path)
@@ -11,7 +12,7 @@ def expand_folder(path, file_list):
 
 if __name__ == '__main__':
 
-    root = Path(r"C:\Users\Utente\Documents\progetti\prime office\nuovi dati\dati\UP DOWN COFFEE SRL\FATTURE XML")
+    root = Path(r"../data/fatture")
 
     files = []
     expand_folder(root, files)
@@ -23,7 +24,7 @@ if __name__ == '__main__':
         except Exception as e:
             print(f.stem,e)
 
-    path = Path(r"C:\Users\Utente\Documents\progetti\prime office\nuovi dati\dati\UP DOWN COFFEE SRL\FATTURE XML\genn-marzo 2021\Fatture in Cloud\acquisti elettronici\03_marzo\IT00970110326_00B1W.xml")
+    path = Path(r"..\data\fatture\05_maggio\IT04839740489_s7f1.xml")
 
     invoice_xml = parse_invoice(path, columns_base)
     for k, v in invoice_xml.items():

@@ -1,15 +1,21 @@
 import pandas as pd
 from pathlib import Path
 
+"""
+TODO: delete this file
+"""
+
 def read_mastrini(path):
     mastrino_path = Path('../data/polaris/Settembre 2020/Mastrini con corrispettivi movimenti settembre.xls')
 
     return (pd.read_excel(mastrino_path, header=2, usecols='B:R'))
 
+
 def clean_mastrini(df):
     # TODO: assign type to each column properly
     df['Data Doc.'] = pd.to_datetime(df['Data Doc.'],format='%d/%m/%Y')
     return df.dropna(axis=0, how='all')
+
 
 def check_mastrini(df):
     print('Columns with all NaNs', df.isna().all(axis=0))
@@ -18,6 +24,7 @@ def check_mastrini(df):
     print('Rows with all Nans', df.isna().all(axis=1).any())
     print('Rows with some Nans', df.isna().any(axis=1).any())
     print(df.dtypes)
+
 
 if __name__ == '__main__':
 

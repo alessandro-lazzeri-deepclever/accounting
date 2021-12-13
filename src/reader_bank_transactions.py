@@ -24,8 +24,8 @@ def select(df):
 
 if __name__ == '__main__':
 
-    path_to_file = Path(r'C:\Users\Utente\Documents\progetti\prime office\nuovi dati\dati\UP DOWN COFFEE SRL\ESTRATTI CONTO\ListaMovimenti 01.11.2020  28.02.2021.xls')
-    invoice_rootdir = r'C:\Users\Utente\Documents\progetti\prime office\nuovi dati\dati\UP DOWN COFFEE SRL\FATTURE XML\16.03.2020-31.12.2020\Fatture in Cloud\acquisti elettronici'
+    path_to_file = Path(r'../data/estratticonto/ListaMovimenti 01.11.2020  28.02.2021.xls')
+    invoice_rootdir = r'../data/fatture/05_maggio' #path to ALL invoices
 
     save_path_match_bank_invoice_date_filter = r'..\result\match_bank_invoice_data_filter.xlsx'
     save_path_match_bank_invoice = r'..\result\match_bank_invoice.xlsx'
@@ -37,7 +37,6 @@ if __name__ == '__main__':
     last_row_index = df.loc[df['Descrizione'] == 'Saldo contabile finale in Euro'].index[0]
 
     bank_movement = df[df.index < last_row_index]
-
 
     invoice = make_df(invoice_rootdir)
 

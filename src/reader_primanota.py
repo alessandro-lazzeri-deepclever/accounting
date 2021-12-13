@@ -176,7 +176,7 @@ def read_Accountingxlsx_to_df(path_to_xlsx):
 
 if __name__ == '__main__':
 
-    path_to_file = r'C:\Users\Utente\Documents\progetti\prime office\nuovi dati\dati\UP DOWN COFFEE SRL\FATTURE XML\all.xlsx'
+    path_to_file = r'../data/primanota/all.xlsx'
     df_row, df_iva = read_Accountingxlsx_to_df(path_to_file)
     save_path_iva = r'..\result\df_iva.xlsx'
     save_path_row = r'..\result\df_row.xlsx'
