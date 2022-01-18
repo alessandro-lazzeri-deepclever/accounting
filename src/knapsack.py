@@ -94,6 +94,7 @@ def match_df(df_row, df_sack, debug = False):
     invoiceIds = np.intersect1d(row_invoices,sack_invoices)
 
     for invoiceID in invoiceIds:
+        #TODO: check this conditions
         rows = df_row[df_row["FatturaElettronicaBody_DatiGenerali_DatiGeneraliDocumento_Numero"] == invoiceID]
         sack = df_sack[(df_sack["ND ori."] == invoiceID) & (df_sack["D/A"] == "D") & (
                     df_sack["Rag. Sociale / Descrizione"] != "IVA SU ACQUISTI")]

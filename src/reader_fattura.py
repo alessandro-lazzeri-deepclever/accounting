@@ -324,7 +324,7 @@ def getAggregatedValuesFromRoot(invoice, tag):
                 except AttributeError:
                     values.append('')
         for agg in aggs:
-            result[field+agg] = AGGREGATOR_OPERATOR[agg](values)
+            result[field+'_'+agg] = AGGREGATOR_OPERATOR[agg](values)
 
     return rename_dict(result, tag)
 
@@ -339,7 +339,7 @@ def getDatiRitenuta(invoice, tag):
         for inv in invoices:
             values.append(inv.find(field).text)
         for agg in aggs:
-            result[field+agg] = AGGREGATOR_OPERATOR[agg](values)
+            result[field+'_'+agg] = AGGREGATOR_OPERATOR[agg](values)
 
     return rename_dict(result, tag)
 
@@ -1126,10 +1126,10 @@ def make_df(rootdir):
 
 
 if __name__ == '__main__':
-    path_to_invoice = Path(r"/data/prime/fatture/FT XML GIUGNO/CAMPAJOLA 236.xml")
+    #path_to_invoice = Path(r"/data/prime/fatture/FT XML GIUGNO/CAMPAJOLA 236.xml")
 
-    invoice = ET.parse(path_to_invoice)
-    root = invoice.getroot()
+    #invoice = ET.parse(path_to_invoice)
+    #root = invoice.getroot()
 
     """
     #for k,v in getFatturaElettronicaHeader(root,'FatturaElettronicaHeader').items():
@@ -1147,20 +1147,23 @@ if __name__ == '__main__':
 
     df1 = make_df(rootdir)
 
-    rootdir2 = r'C:\Users\Utente\PycharmProjects\accounting\data\prime\fatture'
+    rootdir2 = r'C:\Users\Utente\PycharmProjects\accounting\data\fatture'
 
     df2 = make_df(rootdir2)
 
     c1 = df1.columns
     c2 = df2.columns
 
-    print(df1.shape)
+    print('df1', df1.shape)
 
-    print(df2.shape)
+    print('df2', df2.shape)
 
     diff = list(set(c1)-set(c2))
+    print('columns diff')
     for i in diff:
         print(i)
-
+    print('df1 columns')
     for c in df1.columns:
         print(c)
+
+    df1.to_excel('../result/test_df.xlsx')
