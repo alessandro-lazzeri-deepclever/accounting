@@ -691,7 +691,7 @@ def getDatiTrasmissione(invoice, tag):
 
 def getCedentePrestatore(invoice, tag):
     invoice = invoice.find(tag)
-    DatiAnagrafici = getDatiAnagrafici(invoice, 'DatiAnagrafici')
+    DatiAnagrafici = getDatiAnagrafici(invoice, 'DatiAnagrafici', extended = True)
 
     Sede = getSede(invoice, 'Sede')
 
@@ -968,9 +968,9 @@ def getContatti(invoice, tag):
 def getRappresentanteFiscale(invoice, tag):
     invoice = invoice.find(tag)
 
-    return rename_dict(getDatiAnagrafici(invoice,'DatiAnagrafici'), tag)
+    return rename_dict(getDatiAnagrafici(invoice,'DatiAnagrafici', extended = False), tag)
 
-def getDatiAnagrafici(invoice, tag):
+def getDatiAnagrafici(invoice, tag, extended = True):
     try:
         invoice = invoice.find(tag)
     except AttributeError:
@@ -984,6 +984,11 @@ def getDatiAnagrafici(invoice, tag):
         CodiceFiscale = ''
 
     Anagrafica = getAnagrafica(invoice, 'Anagrafica')
+
+    if not extended:
+        return rename_dict(IdFiscaleIVA | Anagrafica | {
+            'CodiceFiscale': CodiceFiscale
+        }, tag)
 
     try:
         AlboProfessionale = invoice.find('AlboProfessionale').text
@@ -1022,7 +1027,7 @@ def getDatiAnagrafici(invoice, tag):
 
 def getCessionarioCommittente(invoice, tag):
     invoice = invoice.find(tag)
-    DatiAnagrafici = getDatiAnagrafici(invoice, 'DatiAnagrafici')
+    DatiAnagrafici = getDatiAnagrafici(invoice, 'DatiAnagrafici', extended = False)
 
     Sede = getSede(invoice, 'Sede')
 
@@ -1059,7 +1064,7 @@ def getRappresentanteFiscale2(invoice, tag):
 
 def getTerzoIntermediarioOSoggettoEmittente(invoice, tag):
     invoice = invoice.find(tag)
-    DatiAnagrafici = getDatiAnagrafici(invoice, 'DatiAnagrafici')
+    DatiAnagrafici = getDatiAnagrafici(invoice, 'DatiAnagrafici', extended = False)
     return rename_dict(DatiAnagrafici, tag)
 
 def getIdTrasmittente(invoice, tag):
@@ -1166,4 +1171,4 @@ if __name__ == '__main__':
     for c in df1.columns:
         print(c)
 
-    df1.to_excel('../result/test_df.xlsx')
+    df1.to_excel('../result/temp/test_df.xlsx')

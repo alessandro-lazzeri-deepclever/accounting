@@ -125,6 +125,7 @@ def parse_data(sheet, current_row_id):
             for i in range(len(iva)):
                 iva[i].append(header)
 
+            # skips blank rows after iva
             if sheet.cell_value(current_row_id, ROW_IDS[0]) == EMPTY_CELL:
                 current_row_id += 1
 
