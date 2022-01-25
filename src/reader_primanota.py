@@ -125,6 +125,9 @@ def parse_data(sheet, current_row_id):
             for i in range(len(iva)):
                 iva[i].append(header)
 
+            if sheet.cell_value(current_row_id, ROW_IDS[0]) == EMPTY_CELL:
+                current_row_id += 1
+
             stop = True
         else:
             row.append([cast2format(sheet.row_values(current_row_id)[i], f) for i, f in zip(ROW_IDS, ROW_FORMAT)])
@@ -178,8 +181,8 @@ if __name__ == '__main__':
 
     path_to_file = r'../data/primanota/all.xlsx'
     df_row, df_iva = read_Accountingxlsx_to_df(path_to_file)
-    save_path_iva = r'..\result\df_iva.xlsx'
-    save_path_row = r'..\result\df_row.xlsx'
+    save_path_iva = r'..\result\temp\df_iva.xlsx'
+    save_path_row = r'..\result\temp\df_row.xlsx'
 
     df_row.to_excel(save_path_row)
     df_iva.to_excel(save_path_iva)
