@@ -4,7 +4,7 @@ import itertools
 from tqdm import tqdm
 import time
 
-def root_mean_suqared_percentage_error(y_true,y_pred):
+def root_mean_squared_percentage_error(y_true, y_pred):
     return (np.sqrt(np.mean(np.square((y_true - y_pred) / y_true)))) * 100
 
 def random_knapsack(rows, sack, tolerance = 0.01, debug = False):
@@ -17,7 +17,7 @@ def random_knapsack(rows, sack, tolerance = 0.01, debug = False):
 
     res = np.zeros(sack.shape)
 
-    while not root_mean_suqared_percentage_error(sack,res) < tolerance:
+    while not root_mean_squared_percentage_error(sack, res) < tolerance:
 
         z = np.zeros(shape = (len(rows), len(sack)-1))
         z = np.array(np.append(z, np.ones(shape=(len(rows), 1)), axis=1))
@@ -27,14 +27,14 @@ def random_knapsack(rows, sack, tolerance = 0.01, debug = False):
 
         res = np.sum(z * np.expand_dims(rows,axis=1), axis=0)
         if debug:
-            print("Mean % error:", root_mean_suqared_percentage_error(sack,res))
+            print("Mean % error:", root_mean_squared_percentage_error(sack, res))
             print("rows", rows)
             print("sack", sack)
             print("z", z)
             input("press something")
 
     if debug:
-        print("Mean % error:", root_mean_suqared_percentage_error(sack, res))
+        print("Mean % error:", root_mean_squared_percentage_error(sack, res))
     return [(z,res)]
 
 def generate_Z(row, cols):
@@ -50,14 +50,15 @@ def generate_Z(row, cols):
 
         yield z
 
-def brute_knapsack(rows, sack, tolerance = 0.01, debug = False, return_first = True, maxTime = 10):
+def brute_knapsack(rows, sack, tolerance = 0.00001, debug = False, return_first = True, maxTime = 120):
     """
 
     :param rows: one row per detailed row invoice
     :param sack: one row per aggregated
     :return: solutions list of tuples with binary matrix with the assignments and matrix
     """
-    solutions = []
+    invalid_solutions = []
+    valid_solutions = []
 
     res = np.zeros(sack.shape)
 
@@ -69,23 +70,27 @@ def brute_knapsack(rows, sack, tolerance = 0.01, debug = False, return_first = T
             break
 
         res = np.sum(z * np.expand_dims(rows,axis=1), axis=0)
-        solutions.append((z,res))
-        if return_first and root_mean_suqared_percentage_error(sack, res) < tolerance:
-            return solutions
+        if root_mean_squared_percentage_error(sack, res) < tolerance:
+            valid_solutions.append((z,res))
+        else:
+            invalid_solutions.append((z,res))
+
+        if return_first and root_mean_squared_percentage_error(sack, res) < tolerance:
+            return valid_solutions, invalid_solutions
 
         if debug:
-            print("Mean % error:", root_mean_suqared_percentage_error(sack,res))
+            print("Mean % error:", root_mean_squared_percentage_error(sack, res))
             print("rows", rows)
             print("sack", sack)
             print("z", z)
             #input("press something")
 
     if debug:
-        print("Mean % error:", root_mean_suqared_percentage_error(sack, res))
-    return solutions
+        print("Mean % error:", root_mean_squared_percentage_error(sack, res))
+    return valid_solutions, invalid_solutions
 
 
-def match_df(df_row, df_sack, debug = False):
+def match_df(df_row, df_sack, debug = False, knapsack_threshold = 1.5*10**6):
 
     # invoice list
     row_invoices = df_row["FatturaElettronicaBody_DatiGenerali_DatiGeneraliDocumento_Numero"].unique()
@@ -114,12 +119,21 @@ def match_df(df_row, df_sack, debug = False):
             print("sack", sack)
             #input("press something")
 
-        solutions = brute_knapsack(row_vals, sack_vals, debug=False, return_first=True)
-        z = solutions[-1]
-        print(z)
-        for idx, z_val in zip(rows.index, z[0]):
-            df_row.at[idx, "join_idx"] = sack.index[np.argwhere(z_val)[0][0]]
+        # check if we can solve the problem in reasonable time
+        if len(sack_vals)**len(row_vals) < knapsack_threshold:
+            # if there is more than one sack we remove all rows with value 0
+            if len(sack_vals) > 1:
+                if any(row_vals == 0):
+                    row_vals = row_vals[row_vals != 0]
 
+                #TODO: if there are negative values we should check if there are same positive values ( +a -a = 0)
+
+            valid_solutions, _ = brute_knapsack(row_vals, sack_vals, debug=False, return_first=True)
+            if len(valid_solutions) == 1:
+                z = valid_solutions[0]
+                print(z)
+                for idx, z_val in zip(rows.index, z[0]):
+                    df_row.at[idx, "join_idx"] = sack.index[np.argwhere(z_val)[0][0]]
 
 
 def test_knapsack():
@@ -140,19 +154,26 @@ if __name__ == '__main__':
 
     if True:
 
-        df1 = pd.DataFrame([[5,"a"], [3,"b"], [4,"c"], [1,"d"], [6,"e"]], columns=["val","feat"], index = np.arange(1,10,2))
+        t = 10
+        for _ in range(10):
 
-        df2 = pd.DataFrame([[9,"aa"], [10,"bb"]], columns=["val","feat"], index = np.arange(1,10,5))
+            df1 = pd.DataFrame([[5,"a"], [3,"b"], [5,"c"], [0.01,"d"], [6,"e"]], columns=["val","feat"], index = np.arange(1,10,2))
 
-        z = brute_knapsack(df1["val"].to_numpy(), df2["val"].to_numpy(), debug=False, return_first=False)
+            df2 = pd.DataFrame([[10,"aa"], [9.01,"bb"]], columns=["val","feat"], index = np.arange(1,10,5))
 
-        print(z)
-        print(z[-1])
-        target = np.array([9,10])
-        for i,j in z:
-            if (j == target).all():
-                print(i,j)
+            z,_ = brute_knapsack(df1["val"].to_numpy(), df2["val"].to_numpy(), debug=True, return_first=False,
+                                 tolerance=t)
 
+            print(t,len(z))
+            t *= 0.1
+            """
+            print(z)
+            print(z[-1])
+            target = np.array([9,10])
+            for i,j in z:
+                if (j == target).all():
+                    print(i,j)
+            """
 
 
     if False:
